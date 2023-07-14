@@ -156,4 +156,91 @@ public class BaseballDAO {
 		return null;
 	}
 
+	public List<Integer> getVertici(String name) {
+		List<Integer> result = new ArrayList<>();
+		String sql = "SELECT distinct t.year " + "FROM teams t " + "WHERE t.name = ?  ";
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, name);
+
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getInt("year"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+
+	}
+	
+	public List<People> getPlayersTeamYear(Integer anno, String name){
+		String sql = "SELECT people.* "
+				+ "FROM teams , appearances, people "
+				+ "WHERE appearances.playerID = people.playerID  "
+				+ "AND appearances.year= teams.year "
+				+ "AND teams.name = ? "
+				+ "AND teams.year=? ";
+		List<People> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, name);
+			st.setInt(2, anno);
+
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(new People(rs.getString("playerID"), rs.getString("birthCountry"), rs.getString("birthCity"),
+						rs.getString("deathCountry"), rs.getString("deathCity"), rs.getString("nameFirst"),
+						rs.getString("nameLast"), rs.getInt("weight"), rs.getInt("height"), rs.getString("bats"),
+						rs.getString("throws"), getBirthDate(rs), getDebutDate(rs), getFinalGameDate(rs),
+						getDeathDate(rs)));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+
+		
+	}
+	public List<String> getTeamsName(){
+		String sql = "SELECT DISTINCT t.name "
+				+ "FROM teams t "
+				+ "ORDER BY t.name ASC ";
+		List<String> result = new ArrayList<>();
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+
+
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getString("name"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+
+	}
+
 }

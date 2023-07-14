@@ -5,8 +5,10 @@
 package it.polito.tdp.exam;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.exam.model.Dettaglio;
 import it.polito.tdp.exam.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbAnno"
-    private ComboBox<?> cmbAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbSquadra"
-    private ComboBox<?> cmbSquadra; // Value injected by FXMLLoader
+    private ComboBox<String> cmbSquadra; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -48,12 +50,31 @@ public class FXMLController {
 
     @FXML
     void handleCreaGrafo(ActionEvent event) {
-
+    	if(!cmbSquadra.getValue().isEmpty())
+    		this.model.buildGraph(cmbSquadra.getValue());
+    	else {
+    		txtResult.setText("Scegli la squadra");
+    	}
+    	if (this.model.getVertici().size()!=0) {
+    		txtResult.appendText("Grafo creato con successo");
+    		this.cmbAnno.getItems().clear();
+    		this.cmbAnno.getItems().addAll(this.model.getVertici());
+    	}
     }
 
     @FXML
     void handleDettagli(ActionEvent event) {
-
+    	Integer anno = this.cmbAnno.getValue();
+    	if (anno == null) {
+    		this.txtResult.setText("Selezionare un anno dall'apposito menu\n");
+    		return;
+    	}
+    	
+    	List<Dettaglio> dettagli = this.model.getDettagli(anno);
+    	this.txtResult.appendText("\nDettagli per l'anno scelto:\n");
+    	for(Dettaglio d : dettagli) {
+    		this.txtResult.appendText(anno+"<->"+d + "\n");
+    	}
     }
 
     @FXML
@@ -75,6 +96,9 @@ public class FXMLController {
 
     public void setModel(Model model) {
         this.model = model;
+        List<String> teams = this.model.getTeamsName();
+        this.cmbSquadra.getItems().clear();
+        this.cmbSquadra.getItems().addAll(teams);
     }
 
 }
